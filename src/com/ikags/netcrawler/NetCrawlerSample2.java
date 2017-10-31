@@ -8,6 +8,9 @@ import com.ikags.utils.BHHeader;
 import com.ikags.utils.FileUtil;
 import com.ikags.utils.NetUtil;
 import com.ikags.utils.StringUtil;
+import com.ikags.utils.bxml.BJsonDriver;
+import com.ikags.utils.bxml.BXmlElement;
+import com.ikags.utils.bxml.BXmlUtil;
 
 
 /**
@@ -15,11 +18,11 @@ import com.ikags.utils.StringUtil;
  * @author airzhangfish
  *
  */
-public class NetCrawlerSample {
+public class NetCrawlerSample2 {
 
 	public static void main(String[] args) {
 
-		NetCrawlerSample dp = new NetCrawlerSample();
+		NetCrawlerSample2 dp = new NetCrawlerSample2();
 		dp.runThreadrun();
 
 	}
@@ -59,7 +62,7 @@ public class NetCrawlerSample {
 			public void run() {
 				
 				//下载数据
-				 crawerNetData(start, count);
+				 //crawerNetData(start, count);
 				 //清洗数据
 				scannerData();
 			}
@@ -77,32 +80,29 @@ public class NetCrawlerSample {
 	private void crawerNetData(final int start, final int count){
 		try {
 			// 下载地址汇总，CSV格式
-			File file = new File("C:\\Users\\airzhangfish\\Desktop\\carlist_data3.csv");
-			Vector vdata = StringUtil.getCSVData(new FileInputStream(file), "UTF-8");
+		
 			Vector<BHHeader> vec = NetUtil.getCustomHeaders();
-			System.out.println("下载数据量=" + vdata.size());
-			
+
 			//下载的数据量
-			for (int index = start; index < start + count; index++) {
+			for (int i = 1; i <= 16; i++) {
+				
+				
 				// 需要填写的项目
-				String carid=(String) ((Vector) vdata.get(index)).get(0);
-				String mmurl = "http://www.atzuche.com/car/reDetail/" + carid+".html";
-				String savepath="C:\\Users\\airzhangfish\\Desktop\\cardetail3\\";
-				String savefilename= carid+".html";
+				String mmurl = "http://www.atzuche.com/car/searchListMap/2?cityCode=440100&sceneCode=U002&filterCondition%5Blon%5D=113.30765&filterCondition%5Blat%5D=23.120049&filterCondition%5Bseq%5D=4&pageNum="+i+"&pageSize=100";
+				String savepath="C:\\Users\\airzhangfish\\Desktop\\carlist\\";
+				String savefilename= "gz_"+i+".json";
 				
 				File nowfile = new File(savepath + savefilename);
 				if (nowfile.exists() == true) {
-					System.out.println(index + ",local had mmurl2=" + mmurl);
+					System.out.println(i + ",local had mmurl2=" + mmurl);
 				} else {
-					if (carid != null && carid.length() > 0) {
-						System.out.println(index + ",net load mmurl2=" + mmurl);
-						String data = NetUtil.getNetText(mmurl, vec, "UTF-8");
-						// POST数据用法：String data = NetUtil.getNetPostTextNogzip(murl, post, vec, encode);
+						System.out.println(i + ",net load mmurl2=" + mmurl);
+						//String data = NetUtil.getNetText(mmurl, vec, "UTF-8");
+						String data = NetUtil.getNetTextNogzip(mmurl,vec, "UTF-8");
 						
 						if (data != null && data.length() > 0) {
 							FileUtil.saveFile(savepath, savefilename, data);
 						}
-					}
 				}
 			}
 			System.out.println("saveover");
@@ -114,23 +114,57 @@ public class NetCrawlerSample {
 	
 	
 	
+	public static void testjson(){
+		
+	
+		
+		
+		String path="C:\\Users\\airzhangfish\\Desktop\\首汽租车\\store长沙.txt";
+		
+
+		try{
+			System.out.println("startload");
+			String data=StringUtil.getLocalFileText(path);
+			BXmlElement root=new BXmlElement();
+			root.setTagName("root");
+			root=BJsonDriver.loadJson(root,data);
+//			root.printNode(1);
+			
+			String savecsvdata=BXmlUtil.converterBXml2CSV(root,true,true);
+			FileUtil.saveFile(path, ".csv", savecsvdata);
+			
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+	}
+	
+	
 	/**
 	 * 扫描本地下载数据，提取需要的数据
 	 */
 	private void scannerData(){
-        String detailfilepath="C:\\Users\\airzhangfish\\Desktop\\cardetail3\\";
+        String detailfilepath="C:\\Users\\airzhangfish\\Desktop\\carlist\\";
 		File filelist = new File(detailfilepath);
 		String[] htmlfiles = filelist.list();
 
 		for (int page = 0; page < htmlfiles.length; page++) {
 			String data = StringUtil.getLocalFileText(detailfilepath + htmlfiles[page]);
 			//分析数据
-			String tag = StringUtil.getTextContent(data, "<em>", "</em>");
-			tag = tag.replaceAll("\n", "").trim(); //清洗格式
+			BXmlElement root=new BXmlElement();
+			root.setTagName("root");
+			root=BJsonDriver.loadJson(root,data);
+
+			Vector<BXmlElement> children=root.getChildrenElement(0).getChildrenElement(0).getChildren();
+			for(int i=0;i<children.size();i++){
+				BXmlElement bxml=children.get(i);
+				String type=bxml.getAttributeValue("type");
+				String dayPrice=bxml.getAttributeValue("dayPrice");
+				System.out.println(type+","+dayPrice);
+			}
 		}
 		
 		//保存
-		FileUtil.saveFile(detailfilepath, "savefilename.csv", "XXXXX");
+//		FileUtil.saveFile(detailfilepath, "savefilename.csv", "XXXXX");
 		
 	}
 	
