@@ -10,8 +10,8 @@ net file crawler<br>
 
 另外通过导入本代码，使用工具类（主要对外提供jar包使用），可以爬数据：
 示例代码：
-
-  //初始化
+		
+		//初始化
 		IKANetCrawlerManager manager=new IKANetCrawlerManager();
 		manager.setGZIPMode(true);
 		manager.setMitlThread(3);
