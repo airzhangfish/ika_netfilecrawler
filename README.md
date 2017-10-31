@@ -15,8 +15,8 @@ net file crawler<br>
 IKANetCrawlerManager manager=new IKANetCrawlerManager();<br>
 manager.setGZIPMode(true);<br>
 manager.setMitlThread(3);<br>
-
-//头部
+<br>
+//头部<br>
 manager.addHeader("Accept", "application/json, text/javascript, */*; q=0.01");<br>
 manager.addHeader("Accept-Encoding", "gzip,deflate");<br>
 manager.addHeader("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_2; en-US) AppleWebKit/533.3 (KHTML, like Gecko) Chrome/5.0.354.0 Safari/533.3");<br>
@@ -28,7 +28,7 @@ manager.addNetText("https://icdn.startcarlife.com/img/1708/1/1708166fb02049x1.jp
 <br>
 //开始下载<br>
 manager.startNetDownload();<br>
-
+<br>
 //其他方法：直接下载文本<br>
 String text=manager.getNetText("https://gz.startcarlife.com/find-car?sort=all&make=car_15&module=m3", null, true);<br>
 <br>
